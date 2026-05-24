@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Verify Users{% endblock %}
+{% block content %}
+<h2>Users</h2>
+
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Username</th>
+      <th>Name</th>
+      <th>DOB</th>
+      <th>Citizenship ID</th>
+      <th>Citizenship Photo</th>
+      <th>Personal Photo</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for u in users %}
+    <tr>
+      <td>{{ u[1] }}</td>
+      <td>{{ u[2] }}</td>
+      <td>{{ u[3] }}</td>
+      <td>{{ u[4] }}</td>
+      <td>
+        <img src="{{ url_for('static', filename='uploads/' ~ u[5]) }}" height="60" alt="citizenship" />
+      </td>
+      <td>
+        <img src="{{ url_for('static', filename='uploads/' ~ u[6]) }}" height="60" alt="personal" />
+      </td>
+      <td>
+        {% if u[7] == 1 %}
+          <span class="badge bg-success">Verified</span>
+        {% else %}
+          <span class="badge bg-warning text-dark">Pending</span>
+        {% endif %}
+      </td>
+      <td>
+        <div style="display: flex; gap: 5px;">
+          {% if u[7] == 0 %}
+          <a href="{{ url_for('approve_user', user_id=u[0]) }}" class="btn btn-success btn-sm">Approve</a>
+          {% endif %}
+          <form method="post" action="{{ url_for('delete_user', user_id=u[0]) }}" onsubmit="return confirm('Delete this user?');">
+            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+          </form>
+        </div>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

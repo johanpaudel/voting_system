@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Register{% endblock %}
+{% block content %}
+<h2>Register</h2>
+<form method="post" enctype="multipart/form-data">
+  <div class="mb-3">
+    <label>Username</label>
+    <input type="text" name="username" class="form-control" required />
+  </div>
+  <div class="mb-3">
+    <label>Password</label>
+    <input type="password" name="password" class="form-control" required />
+  </div>
+  <div class="mb-3">
+    <label>Full Name</label>
+    <input type="text" name="name" class="form-control" required />
+  </div>
+  <div class="mb-3">
+    <label>Date of Birth</label>
+    <input type="date" name="dob" class="form-control" required />
+  </div>
+  <div class="mb-3">
+    <label>Citizenship ID</label>
+    <input type="text" name="citizenship_id" class="form-control" required />
+  </div>
+  <div class="mb-3">
+    <label>Citizenship Photo (PNG/JPG/JPEG)</label>
+    <input type="file" name="citizenship_photo" accept=".png,.jpg,.jpeg" class="form-control" required />
+  </div>
+  <div class="mb-3">
+    <label>Personal Photo (PNG/JPG/JPEG)</label>
+    <input type="file" name="personal_photo" accept=".png,.jpg,.jpeg" class="form-control" required />
+  </div>
+  <button type="submit" class="btn btn-primary">Register</button>
+</form>
+{% endblock %}

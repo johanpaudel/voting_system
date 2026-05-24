@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Election Result</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 50%;
+            margin: 20px auto;
+        }
+        th, td {
+            border: 1px solid #888;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #eee;
+        }
+        h2 {
+            text-align: center;
+        }
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Election Result: {{ election[1] }}</h2>
+
+    {% if result %}
+    <table>
+        <tr>
+            <th>Candidate</th>
+            <th>Total Votes</th>
+        </tr>
+        {% for row in result %}
+        <tr>
+            <td>{{ row[0] }}</td>
+            <td>{{ row[1] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p style="text-align: center;">No votes have been cast yet.</p>
+    {% endif %}
+
+    <div class="back-link">
+        {% if session['role'] == 'admin' %}
+            <a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a>
+        {% else %}
+            <a href="{{ url_for('user_dashboard') }}">Back to User Dashboard</a>
+        {% endif %}
+    </div>
+
+</body>
+</html>

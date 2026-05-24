@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head><title>Create Election</title></head>
+<body>
+<h2>Create New Election</h2>
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul style="color:green;">
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+<form method="POST">
+    <label>Election Title:</label><br>
+    <input type="text" name="title" required><br><br>
+    
+    <label>Start Date & Time:</label><br>
+    <input type="datetime-local" name="start_date" required><br><br>
+    
+    <label>End Date & Time:</label><br>
+    <input type="datetime-local" name="end_date" required><br><br>
+    
+    <button type="submit">Create Election</button>
+</form>
+<p><a href="/admin">Back to Admin Dashboard</a></p>
+</body>
+</html>

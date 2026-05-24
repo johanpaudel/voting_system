@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}User Dashboard{% endblock %}
+{% block content %}
+<h2>User Dashboard</h2>
+
+<h4>Ongoing Elections</h4>
+{% if ongoing %}
+  <ul class="list-group mb-3">
+  {% for e in ongoing %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      {{ e[1] }} ({{ e[2] }} to {{ e[3] }})
+      {% if e[0] in voted %}
+        <span class="badge bg-success">Voted</span>
+        <a href="{{ url_for('result', election_id=e[0]) }}" class="btn btn-sm btn-info ms-2">View Results</a>
+      {% else %}
+        <a href="{{ url_for('vote', election_id=e[0]) }}" class="btn btn-sm btn-primary ms-2">Vote</a>
+      {% endif %}
+    </li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <p>No ongoing elections at the moment.</p>
+{% endif %}
+
+<h4>Upcoming Elections</h4>
+{% if future %}
+  <ul class="list-group mb-3">
+  {% for e in future %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      {{ e[1] }} ({{ e[2] }} to {{ e[3] }})
+      <span class="badge bg-secondary">Not Started</span>
+    </li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <p>No upcoming elections.</p>
+{% endif %}
+
+<h4>Expired Elections</h4>
+{% if expired %}
+  <ul class="list-group">
+  {% for e in expired %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      {{ e[1] }} ({{ e[2] }} to {{ e[3] }})
+      <a href="{{ url_for('result', election_id=e[0]) }}" class="btn btn-sm btn-info">View Results</a>
+    </li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <p>No expired elections.</p>
+{% endif %}
+
+{% endblock %}

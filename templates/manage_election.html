@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block title %}Manage Elections{% endblock %}
+{% block content %}
+<h2>Manage Elections</h2>
+
+<!-- Create Election Form -->
+<form method="post" class="mb-4">
+  <h5>Create New Election</h5>
+  <input type="hidden" name="create_election" value="1" />
+  
+  <div class="mb-3">
+    <label>Title</label>
+    <input type="text" name="title" class="form-control" required />
+  </div>
+  
+  <div class="mb-3">
+    <label>Start Date & Time</label>
+    <input type="datetime-local" name="start_date" class="form-control" required />
+  </div>
+  
+  <div class="mb-3">
+    <label>End Date & Time</label>
+    <input type="datetime-local" name="end_date" class="form-control" required />
+  </div>
+  
+  <button type="submit" class="btn btn-success">Create Election</button>
+</form>
+
+
+<hr>
+
+<!-- Add Candidate Form -->
+<form method="post" class="mb-4">
+  <h5>Add Candidate</h5>
+  <input type="hidden" name="add_candidate" value="1" />
+  <div class="mb-3">
+    <label>Candidate Name</label>
+    <input type="text" name="candidate_name" class="form-control" required />
+  </div>
+  <div class="mb-3">
+    <label>Party</label>
+    <input type="text" name="party" class="form-control" required />
+  </div>
+  <div class="mb-3">
+    <label>Election</label>
+    <select name="election_id" class="form-select" required>
+      <option value="" disabled selected>Select Election</option>
+      {% for election in elections %}
+        <option value="{{ election[0] }}">{{ election[1] }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <button type="submit" class="btn btn-primary">Add Candidate</button>
+</form>
+
+<hr>
+
+<!-- List Elections -->
+<h5>Existing Elections</h5>
+<table class="table table-bordered">
+  <thead>
+    <tr><th>ID</th><th>Title</th><th>Start</th><th>End</th><th>Actions</th></tr>
+  </thead>
+  <tbody>
+    {% for e in elections %}
+    <tr>
+      <td>{{ e[0] }}</td>
+      <td>{{ e[1] }}</td>
+      <td>{{ e[2] }}</td>
+      <td>{{ e[3] }}</td>
+      <td style="display: flex; gap: 5px;">
+        <form method="post" action="{{ url_for('delete_election', election_id=e[0]) }}" onsubmit="return confirm('Delete election?');">
+          <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+        </form>
+        <a href="{{ url_for('result', election_id=e[0]) }}" class="btn btn-info btn-sm">View Result</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<hr>
+
+<!-- List Candidates -->
+<h5>Existing Candidates</h5>
+<table class="table table-bordered">
+  <thead>
+    <tr><th>ID</th><th>Name</th><th>Party</th><th>Election</th><th>Action</th></tr>
+  </thead>
+  <tbody>
+    {% for c in candidates %}
+    <tr>
+      <td>{{ c[0] }}</td>
+      <td>{{ c[1] }}</td>
+      <td>{{ c[2] }}</td>
+      <td>{{ c[4] }}</td>
+      <td>
+        <form method="post" action="{{ url_for('delete_candidate', candidate_id=c[0]) }}" onsubmit="return confirm('Delete candidate?');">
+          <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

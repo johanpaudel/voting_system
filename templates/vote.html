@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Vote - {{ election[1] }}{% endblock %}
+{% block content %}
+<h2>Vote in {{ election[1] }}</h2>
+<form method="post">
+  {% for c in candidates %}
+    <div class="form-check mb-2">
+      <input class="form-check-input" type="radio" name="candidate" id="cand{{ c[0] }}" value="{{ c[0] }}" required />
+      <label class="form-check-label" for="cand{{ c[0] }}">
+        {{ c[1] }} ({{ c[2] }})
+      </label>
+    </div>
+  {% endfor %}
+  <button type="submit" class="btn btn-primary mt-3">Submit Vote</button>
+</form>
+{% endblock %}
