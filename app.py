@@ -1,21 +1,29 @@
-from flask import Flask, render_template, request, redirect, session, flash, send_file, url_for
+﻿from flask import Flask, render_template, request, redirect, session, flash, send_file, url_for
 import sqlite3, os, pandas as pd
 from werkzeug.utils import secure_filename
 from datetime import datetime
 
 app = Flask(__name__)
-app.secret_key = 'voting_secret'
+app.secret_key = os.environ.get('SECRET_KEY', 'voting_secret_dev')
 
-UPLOAD_FOLDER = 'static/uploads'
+# Use /tmp/uploads on production (Render), static/uploads locally
+if os.environ.get('RENDER'):
+    UPLOAD_FOLDER = '/tmp/uploads'
+else:
+    UPLOAD_FOLDER = 'static/uploads'
+
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# Use persistent disk on Render for the database
+DB_PATH = '/data/voting.db' if os.environ.get('RENDER') else 'voting.db'
 
 def allowed_file(fname):
     return '.' in fname and fname.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def init_db():
-    conn = sqlite3.connect('voting.db')
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("""
     CREATE TABLE IF NOT EXISTS users (
@@ -80,7 +88,7 @@ def register():
         cit.save(os.path.join(UPLOAD_FOLDER, cit_name))
         per.save(os.path.join(UPLOAD_FOLDER, per_name))
 
-        conn = sqlite3.connect('voting.db')
+        conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
 
         # Check if username already exists
@@ -119,7 +127,7 @@ def login():
     if request.method=='POST':
         u = request.form['username']
         p = request.form['password']
-        conn = sqlite3.connect('voting.db')
+        conn = sqlite3.connect(DB_PATH)
         user = conn.execute("SELECT * FROM users WHERE username=? AND password=?", (u,p)).fetchone()
         conn.close()
         if not user:
@@ -157,7 +165,7 @@ def manage_election():
     if session.get('role') != 'admin':
         return redirect(url_for('login'))
 
-    conn = sqlite3.connect('voting.db')
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
     # Handle creating a new election
@@ -209,7 +217,7 @@ def manage_election():
 def delete_election(election_id):
     if session.get('role') != 'admin':
         return redirect(url_for('login'))
-    conn = sqlite3.connect('voting.db')
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("DELETE FROM candidates WHERE election_id=?", (election_id,))
     cursor.execute("DELETE FROM votes WHERE election_id=?", (election_id,))
@@ -223,7 +231,7 @@ def delete_election(election_id):
 def delete_candidate(candidate_id):
     if session.get('role') != 'admin':
         return redirect(url_for('login'))
-    conn = sqlite3.connect('voting.db')
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("DELETE FROM votes WHERE candidate_id=?", (candidate_id,))
     cursor.execute("DELETE FROM candidates WHERE id=?", (candidate_id,))
@@ -236,7 +244,7 @@ def delete_candidate(candidate_id):
 def verify_users():
     if session.get('role') != 'admin':
         return redirect('/login')
-    conn = sqlite3.connect('voting.db')
+    conn = sqlite3.connect(DB_PATH)
     users = conn.execute("""
         SELECT id, username, name, dob, citizenship_id, citizenship_photo, personal_photo, verified
         FROM users
@@ -249,7 +257,7 @@ def verify_users():
 def approve_user(user_id):
     if session.get('role')!='admin':
         return redirect('/login')
-    conn = sqlite3.connect('voting.db')
+    conn = sqlite3.connect(DB_PATH)
     conn.execute("UPDATE users SET verified=1 WHERE id=?", (user_id,))
     conn.commit()
     conn.close()
@@ -258,7 +266,7 @@ def approve_user(user_id):
 
 @app.route('/delete_user/<int:user_id>', methods=['POST'])
 def delete_user(user_id):
-    conn = sqlite3.connect('voting.db')
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("DELETE FROM users WHERE id=?", (user_id,))
     conn.commit()
@@ -274,7 +282,7 @@ def user_dashboard():
 
     now = datetime.now().isoformat()
 
-    conn = sqlite3.connect('voting.db')
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
     ongoing = cursor.execute("SELECT * FROM elections WHERE start_date <= ? AND end_date >= ?", (now, now)).fetchall()
@@ -293,7 +301,7 @@ def user_dashboard():
 def vote(election_id):
     if session.get('role')!='user':
         return redirect('/login')
-    conn = sqlite3.connect('voting.db')
+    conn = sqlite3.connect(DB_PATH)
     verified = conn.execute("SELECT verified FROM users WHERE id=?", (session['user_id'],)).fetchone()[0]
     if verified == 0:
         conn.close()
@@ -326,7 +334,7 @@ def result(election_id):
     if 'role' not in session:
         return redirect('/login')
 
-    conn = sqlite3.connect('voting.db')
+    conn = sqlite3.connect(DB_PATH)
     election = conn.execute("SELECT * FROM elections WHERE id=?", (election_id,)).fetchone()
 
     # Check for normal users if election has ended
@@ -354,6 +362,9 @@ def logout():
     session.clear()
     return redirect('/')
 
+# Initialize DB on startup
+init_db()
+
 if __name__ == '__main__':
-    init_db()
-    app.run(debug=True)
+    app.run(debug=False)
+
