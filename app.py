@@ -1,4 +1,4 @@
-﻿from flask import Flask, render_template, request, redirect, session, flash, send_file, url_for
+from flask import Flask, render_template, request, redirect, session, flash, send_file, url_for
 import sqlite3, os, pandas as pd
 from werkzeug.utils import secure_filename
 from datetime import datetime
@@ -16,8 +16,8 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Use persistent disk on Render for the database
-DB_PATH = '/data/voting.db' if os.environ.get('RENDER') else 'voting.db'
+# Use /tmp on Render (free tier), local voting.db otherwise
+DB_PATH = '/tmp/voting.db' if os.environ.get('RENDER') else 'voting.db'
 
 def allowed_file(fname):
     return '.' in fname and fname.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -363,7 +363,10 @@ def logout():
     return redirect('/')
 
 # Initialize DB on startup
-init_db()
+try:
+    init_db()
+except Exception as e:
+    print(f"DB init error: {e}")
 
 if __name__ == '__main__':
     app.run(debug=False)

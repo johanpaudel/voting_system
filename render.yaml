@@ -9,7 +9,3 @@ services:
         generateValue: true
       - key: RENDER
         value: true
-    disk:
-      name: voting-db
-      mountPath: /data
-      sizeGB: 1
